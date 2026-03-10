@@ -149,6 +149,7 @@ class AgoraEngineXManager {
     try {
       GSLogger.info("AgoraEngineXManager: Switching audio input to: $deviceId");
       final deviceManager = await _engine!.getAudioDeviceManager();
+      await deviceManager.followSystemRecordingDevice(false);
       await deviceManager.setRecordingDevice(deviceId);
       GSLogger.info("AgoraEngineXManager: Audio input switched successfully");
     } catch (e) {
@@ -170,6 +171,7 @@ class AgoraEngineXManager {
           "AgoraEngineXManager: Switching audio output to: $deviceId");
 
       final deviceManager = await _engine!.getAudioDeviceManager();
+      await deviceManager.followSystemPlaybackDevice(false);
 
       // Log current device before change
       try {

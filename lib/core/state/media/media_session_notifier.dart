@@ -83,6 +83,7 @@ class MediaSessionNotifier extends AsyncNotifier<MediaSessionState> {
     
     state = const AsyncValue.loading();
     _isLeavingSession = false;
+    _role = role;  // Important: Set the role so getAgoraUid() returns correct UID
 
     try {
       // 1. READ all necessary context from other providers.

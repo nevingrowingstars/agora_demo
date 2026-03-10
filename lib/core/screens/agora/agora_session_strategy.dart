@@ -124,8 +124,11 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
     GSLogger.info("localVideoView getter called");
 
     if (_engineManager.engine != null && _localViewController != null) {
-      return AgoraVideoView(
-        controller: _localViewController!,
+      return SizedBox.expand(
+        key: const ValueKey('local_video'),
+        child: AgoraVideoView(
+          controller: _localViewController!,
+        ),
       );
     } else {
       return const ColoredBox(color: Colors.black);
@@ -135,7 +138,7 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
   @override
   Widget get remoteVideoView {
     GSLogger.info(
-        "remoteVideoView called - remoteUid: $_remoteUid, cached: $_cachedRemoteUid, hasController: ${_cachedRemoteController != null}");
+        "remoteVideoView called - remoteUid: $_remoteUid, confirmed: $_confirmedPeerUid, cached: $_cachedRemoteUid, hasController: ${_cachedRemoteController != null}");
 
     final uid = _confirmedPeerUid ?? _remoteUid;
 
@@ -150,7 +153,7 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
     }
 
     GSLogger.info(
-        "Creating FRESH remote controller for UID: $_remoteUid on channel: $channelName");
+        "Creating remote view for UID: $uid on channel: $channelName");
     // Always create fresh controller if UID changed or controller is null
     if (_cachedRemoteController == null || _cachedRemoteUid != uid) {
       GSLogger.info(
@@ -160,13 +163,18 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
         rtcEngine: _engineManager.engine!,
         canvas: VideoCanvas(
           uid: uid,
-          renderMode: RenderModeType.renderModeHidden,
+          renderMode: RenderModeType.renderModeFit,
         ),
         connection: RtcConnection(channelId: channelName),
+        useFlutterTexture: true,
       );
       _cachedRemoteUid = uid;
     }
-    return AgoraVideoView(controller: _cachedRemoteController!);
+    // Use key to force rebuild when UID changes, wrap in SizedBox.expand for proper sizing
+    return SizedBox.expand(
+      key: ValueKey('remote_video_$uid'),
+      child: AgoraVideoView(controller: _cachedRemoteController!),
+    );
   }
 
   @override
@@ -243,8 +251,9 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
           rtcEngine: _engineManager.engine!,
           canvas: const VideoCanvas(
             uid: 0,
-            renderMode: RenderModeType.renderModeHidden,
+            renderMode: RenderModeType.renderModeFit,
           ),
+          useFlutterTexture: true,
         );
 
         // Ensure video is enabled at engine level (for both local and remote)
@@ -807,22 +816,34 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
     try {
       GSLogger.info('[Agora] Subscribing to remote user: $uid');
 
-      // ✅ Correct - no need for ! after null check
+      // Unmute remote streams to enable receiving
       await engine.muteRemoteAudioStream(uid: uid, mute: false);
       await engine.muteRemoteVideoStream(uid: uid, mute: false);
 
-      await engine.setRemoteVideoSubscriptionOptions(
+      // Setup remote video canvas - important for web platform
+      await engine.setupRemoteVideo(VideoCanvas(
         uid: uid,
-        options: const VideoSubscriptionOptions(
-          type: VideoStreamType.videoStreamHigh,
-        ),
-      );
+        renderMode: RenderModeType.renderModeFit,
+        mirrorMode: VideoMirrorModeType.videoMirrorModeDisabled,
+      ));
+
+      // Set subscription options for high quality
+      try {
+        await engine.setRemoteVideoSubscriptionOptions(
+          uid: uid,
+          options: const VideoSubscriptionOptions(
+            type: VideoStreamType.videoStreamHigh,
+          ),
+        );
+      } catch (e) {
+        // This might not be supported on web, ignore
+        GSLogger.info('[Agora] setRemoteVideoSubscriptionOptions not supported: $e');
+      }
 
       GSLogger.info('[Agora] Subscribed to remote user: $uid');
     } catch (e) {
       // Error -4 (NOT_READY) is expected sometimes
-      // The subscription will happen automatically when user joins
-      GSLogger.info('[Agora] Error subscribing to remote user $uid: $e');
+      GSLogger.warning('[Agora] Error subscribing to remote user $uid: $e');
     }
   }
 

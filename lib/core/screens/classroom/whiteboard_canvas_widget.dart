@@ -3,12 +3,15 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:agora_demo/core/constants/app_constants.dart';
+import 'package:agora_demo/core/state/media/media_session_notifier.dart';
+import 'package:agora_demo/core/state/router/router_provider.dart';
 import 'package:agora_demo/core/util/app_logger_util.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'dart:io' show Platform;
+import 'package:go_router/go_router.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -111,6 +114,12 @@ class _WhiteboardCanvasWidgetCanvasState
                               painter:
                                   WhiteBoardCanvasPainter(Colors.white, 2.0),
                             ),
+                            // Logout Button
+                            Positioned(
+                              top: 16,
+                              right: 16,
+                              child: _buildLogoutButton(context),
+                            ),
                           ],
                         ),
                       ),
@@ -123,6 +132,52 @@ class _WhiteboardCanvasWidgetCanvasState
         ),
       ),
     );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red.shade600,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      ),
+      onPressed: () => _showLogoutConfirmation(context),
+      icon: const Icon(Icons.logout, size: 20),
+      label: const Text("Logout"),
+    );
+  }
+
+  Future<void> _showLogoutConfirmation(BuildContext context) async {
+    final bool? confirmLeave = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Leave Session?"),
+        content: const Text(
+            "Your session will end and you will be disconnected."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text("Stay"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text("Leave"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmLeave == true && context.mounted) {
+      GSLogger.info("WhiteboardCanvas: User confirmed logout, leaving session.");
+      // Set flag to skip router's onExit dialog
+      ref.read(isExitApprovedProvider.notifier).state = true;
+      await ref.read(mediaSessionProvider.notifier).leaveSession();
+      if (context.mounted) {
+        context.go('/');
+      }
+    }
   }
 
   @override

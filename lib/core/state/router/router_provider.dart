@@ -1,5 +1,6 @@
 import 'package:agora_demo/core/config/session_role_enum.dart';
 import 'package:agora_demo/core/screens/classroom/classroom_device_setup_screen.dart';
+import 'package:agora_demo/core/screens/role_selection_screen.dart';
 import 'package:agora_demo/core/state/router/classroom_initializer.dart';
 import 'package:agora_demo/core/util/app_logger_util.dart';
 import 'package:agora_demo/main.dart';
@@ -15,9 +16,13 @@ final isExitApprovedProvider = StateProvider<bool>((ref) => false);
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/dashboard/mediasetup',
+    initialLocation: '/',
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const RoleSelectionScreen(),
+      ),
       GoRoute(
           path: '/dashboard',
           builder: (context, state) =>
@@ -35,6 +40,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               // --- ADD THIS HANDLER ---
               onExit: (BuildContext context, GoRouterState state) async {
                 GSLogger.info("Router: onExit triggered for Classroom.");
+
+                // Check if exit was already approved (e.g., from Logout button)
+                final isApproved = ref.read(isExitApprovedProvider);
+                if (isApproved) {
+                  // Reset the flag and allow exit without dialog
+                  ref.read(isExitApprovedProvider.notifier).state = false;
+                  return true;
+                }
 
                 // 3. Show Confirmation Dialog
                 // Use the context provided by onExit to show the dialog.

@@ -1,3 +1,4 @@
+import 'package:agora_demo/core/config/agora_config.dart';
 import 'package:agora_demo/core/model/agora_config.dart';
 
 class AgoraConfigService {
@@ -5,10 +6,9 @@ class AgoraConfigService {
 
   Future<AgoraConfig> fetchConfig() async {
     return AgoraConfig(
-      appId: "AppId",
-      token:
-          "token",
-      channelId: "gswhiteboard",
+      appId: AgoraConstants.appId,
+      token:AgoraConstants.token,
+      channelId: AgoraConstants.channelId
     );
   }
 }

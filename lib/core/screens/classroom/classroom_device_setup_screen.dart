@@ -88,18 +88,28 @@ class _ClassroomDeviceSetupScreenState
               ),
             ),
             // Join Button (Unified Logic)
-            ElevatedButton.icon(
-              // Logic for enabling the button:
-              // 1. If Tutor: Always enabled.
-              // 2. If Student: Only enabled if `isTutorPresent` is true.
-              // 3. If `isJoining` is true, disable it to prevent double-clicks.
-              
-              onPressed: _joinClassroom,
-              icon: Icon(Icons.arrow_forward),
-              label: Text('Join Classroom'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50), // Full width button
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 16,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _joinClassroom,
+                  icon: Icon(Icons.arrow_forward),
+                  label: Text('Join Classroom'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => context.go('/'),
+                  icon: Icon(Icons.exit_to_app),
+                  label: Text('Exit'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    backgroundColor: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

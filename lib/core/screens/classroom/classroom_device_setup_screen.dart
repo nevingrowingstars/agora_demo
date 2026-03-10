@@ -62,7 +62,7 @@ class _ClassroomDeviceSetupScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 1,
           children: [
-            SizedBox(height: 10),
+            SizedBox(height: 5),
             Text(
               'Are These Settings Correct?',
               style: TextStyle(
@@ -71,7 +71,7 @@ class _ClassroomDeviceSetupScreenState
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 5),
             Text(
               "Check your camera, mic, and audio are working correctly. If you have any questions or issues before entering the classroom, use the chat to connect instantly with your tutor or support.",
               style: TextStyle(
@@ -88,28 +88,31 @@ class _ClassroomDeviceSetupScreenState
               ),
             ),
             // Join Button (Unified Logic)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 16,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _joinClassroom,
-                  icon: Icon(Icons.arrow_forward),
-                  label: Text('Join Classroom'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 100, top: 50),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 8,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _joinClassroom,
+                    icon: Icon(Icons.arrow_forward),
+                    label: Text('Join Classroom'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    ),
                   ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => context.go('/'),
-                  icon: Icon(Icons.exit_to_app),
-                  label: Text('Exit'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                    backgroundColor: Colors.grey.shade600,
+                  ElevatedButton.icon(
+                    onPressed: () => context.go('/'),
+                    icon: Icon(Icons.exit_to_app),
+                    label: Text('Exit'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      backgroundColor: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

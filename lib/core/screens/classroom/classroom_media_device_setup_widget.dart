@@ -51,6 +51,10 @@ class _ClassroomMediaDeviceSetupWidgetState
           if (!mediaStatus.isChecking && mediaStatus.hasIssues)
             _buildMediaWarningBanner(mediaStatus),
 
+          // Retry Button
+          if (!mediaStatus.isChecking && mediaStatus.hasIssues)
+            _buildRetryButton(),  
+
           // --- Audio Input ---
           const AudioInputSelectorTestWidget(showJoinSwitch: true),
 
@@ -68,9 +72,7 @@ class _ClassroomMediaDeviceSetupWidgetState
           ),
           SizedBox(height: 2),
 
-          // Retry Button
-          if (!mediaStatus.isChecking && mediaStatus.hasIssues)
-            _buildRetryButton(),
+          
         ],
       ),
     );

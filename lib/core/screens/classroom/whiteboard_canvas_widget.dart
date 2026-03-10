@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:agora_demo/core/constants/app_constants.dart';
+import 'package:agora_demo/core/screens/classroom/audio_settings_overlay_widget.dart';
 import 'package:agora_demo/core/state/media/media_session_notifier.dart';
 import 'package:agora_demo/core/state/router/router_provider.dart';
 import 'package:agora_demo/core/util/app_logger_util.dart';
@@ -114,11 +115,18 @@ class _WhiteboardCanvasWidgetCanvasState
                               painter:
                                   WhiteBoardCanvasPainter(Colors.white, 2.0),
                             ),
-                            // Logout Button
+                            // Top Right Buttons
                             Positioned(
                               top: 16,
                               right: 16,
-                              child: _buildLogoutButton(context),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildSettingsButton(context),
+                                  const SizedBox(width: 8),
+                                  _buildLogoutButton(context),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -131,6 +139,19 @@ class _WhiteboardCanvasWidgetCanvasState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSettingsButton(BuildContext context) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey.shade700,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      ),
+      onPressed: () => AudioSettingsOverlayWidget.show(context),
+      icon: const Icon(Icons.settings, size: 20),
+      label: const Text("Settings"),
     );
   }
 

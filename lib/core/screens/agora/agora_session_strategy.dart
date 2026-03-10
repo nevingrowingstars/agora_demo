@@ -488,30 +488,73 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
 
         // === HANDLE VIDEO STATE CHANGES ===
 
-        // --- VIDEO ACTIVE (Decoding or Starting) ---
-        if (state == RemoteVideoState.remoteVideoStateDecoding ||
-            state == RemoteVideoState.remoteVideoStateStarting) {
+        // --- VIDEO ACTIVE (Decoding) - This is when video is actually ready ---
+        if (state == RemoteVideoState.remoteVideoStateDecoding) {
           // Handle PEER'S SCREEN SHARE becoming active
           if (remoteUid == screenShareUid) {
-            GSLogger.info('[Agora] Peer screen share video ACTIVE: $remoteUid');
+            GSLogger.info('[Agora] Peer screen share video DECODING: $remoteUid');
             return;
           }
+          
           // Handle PEER'S CAMERA becoming active
-          // Skip if remote is screen sharing - this might be screen share track, not camera
           if (_isRemoteSharingScreen) {
             GSLogger.info(
                 '[Agora] Remote is sharing screen. Ignoring camera video event.');
             return;
           }
 
-          // Handle remote peer UNMUTED video
-          if (reason ==
-              RemoteVideoStateReason.remoteVideoStateReasonRemoteUnmuted) {
-            GSLogger.info('[Agora] Remote peer UNMUTED video: $remoteUid');
+          GSLogger.info('[Agora] Remote video DECODING for UID: $remoteUid');
+
+          // Force new controller creation since video is now actually decoding
+          _cachedRemoteController = null;
+          _cachedRemoteUid = null;
+
+          // Confirm peer if not already confirmed
+          if (_confirmedPeerUid == null && remoteUid == peerUidInt) {
+            GSLogger.info(
+                '[Agora] *** CONFIRMED PEER WITH DECODING VIDEO: $remoteUid ***');
+            _confirmedPeerUid = remoteUid;
+            _remoteUid = remoteUid;
+            _remoteConnection = connection;
+            _onEventCallback?.call(PeerReadyEvent());
+          }
+
+          _onEventCallback?.call(RemoteMediaStateChangedEvent(
+            mediaType: 'video',
+            isEnabled: true,
+          ));
+          _onEventCallback?.call(RemoteVideoReadyEvent());
+          return;
+        }
+
+        // --- VIDEO STARTING (not yet ready, just informational) ---
+        if (state == RemoteVideoState.remoteVideoStateStarting) {
+          // On web platform, video may stay at STARTING state with RemoteUnmuted reason
+          // when the track is actually available. Handle this case.
+          if (reason == RemoteVideoStateReason.remoteVideoStateReasonRemoteUnmuted) {
+            GSLogger.info('[Agora] Remote video STARTING with UNMUTED for UID: $remoteUid - treating as ready');
+            
+            if (remoteUid == screenShareUid) {
+              GSLogger.info('[Agora] Screen share video ready: $remoteUid');
+              return;
+            }
+            
+            if (_isRemoteSharingScreen) {
+              return;
+            }
 
             // Force new controller creation
             _cachedRemoteController = null;
             _cachedRemoteUid = null;
+
+            // Confirm peer if not already confirmed
+            if (_confirmedPeerUid == null && remoteUid == peerUidInt) {
+              GSLogger.info('[Agora] *** CONFIRMED PEER WITH STARTING VIDEO: $remoteUid ***');
+              _confirmedPeerUid = remoteUid;
+              _remoteUid = remoteUid;
+              _remoteConnection = connection;
+              _onEventCallback?.call(PeerReadyEvent());
+            }
 
             _onEventCallback?.call(RemoteMediaStateChangedEvent(
               mediaType: 'video',
@@ -520,21 +563,8 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
             _onEventCallback?.call(RemoteVideoReadyEvent());
             return;
           }
-
-          // Confirm peer on FIRST active video (only if not already confirmed)
-          if (_confirmedPeerUid == null && remoteUid == peerUidInt) {
-            GSLogger.info(
-                '[Agora] *** CONFIRMED PEER WITH ACTIVE VIDEO: $remoteUid ***');
-
-            _confirmedPeerUid = remoteUid;
-            _remoteUid = remoteUid;
-            _remoteConnection = connection;
-            _cachedRemoteController = null;
-            _cachedRemoteUid = null;
-
-            _onEventCallback?.call(PeerReadyEvent());
-            _onEventCallback?.call(RemoteVideoReadyEvent());
-          }
+          
+          GSLogger.info('[Agora] Remote video STARTING for UID: $remoteUid (waiting for DECODING or UNMUTED)');
           return;
         }
 
@@ -643,9 +673,10 @@ class AgoraSessionStrategy implements MediaSessionStrategy {
         _cachedRemoteController = null;
         _cachedRemoteUid = null;
 
-        _subscribeToRemoteUser(rUid);
+        // Don't subscribe or create controller here - wait for onRemoteVideoStateChanged
+        // with remoteVideoStateDecoding which indicates the track is actually ready
         _onEventCallback?.call(PeerReadyEvent());
-        _onEventCallback?.call(RemoteVideoReadyEvent());
+        // Don't fire RemoteVideoReadyEvent yet - wait for video to actually be decoding
       },
       onUserMuteAudio: (RtcConnection connection, int remoteUid, bool muted) {
         if (!_isSessionActive) return;

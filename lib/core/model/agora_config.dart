@@ -1,3 +1,5 @@
+import 'package:agora_demo/core/config/agora_config.dart';
+
 class AgoraConfig {
   final String appId;
   final String? token;
@@ -7,9 +9,9 @@ class AgoraConfig {
 
   factory AgoraConfig.fromJson(Map<String, dynamic> json) {
     return AgoraConfig(
-      appId: json['appId'] as String,
-      token: json['token'] as String?,
-      channelId: json['channelId'] as String? ?? 'gswhiteboard',
+      appId: AgoraConstants.appId, // Use constant for appId
+      token: AgoraConstants.token,
+      channelId: AgoraConstants.channelId,
     );
   }
 }

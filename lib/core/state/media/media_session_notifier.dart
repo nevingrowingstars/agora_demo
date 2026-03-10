@@ -339,6 +339,44 @@ class MediaSessionNotifier extends AsyncNotifier<MediaSessionState> {
       return;
     }
     final currentState = state.valueOrNull ?? const MediaSessionState();
+    
+    GSLogger.info("MediaSessionNotifier: Received event ${event.runtimeType}");
+
+    if (event is RemoteVideoReadyEvent) {
+      // Remote video is ready - update the state with the new remote video view
+      GSLogger.info("MediaSessionNotifier: Remote video is ready, updating state");
+      state = AsyncData(currentState.copyWith(
+        remoteVideoView: activeStrategy?.remoteVideoView,
+      ));
+    } else if (event is PeerReadyEvent) {
+      // Peer has joined - update state
+      GSLogger.info("MediaSessionNotifier: Peer is ready");
+      state = AsyncData(currentState.copyWith(
+        isPeerConnected: true,
+        remoteVideoView: activeStrategy?.remoteVideoView,
+      ));
+    } else if (event is RemoteMediaStateChangedEvent) {
+      GSLogger.info("MediaSessionNotifier: Remote ${event.mediaType} ${event.isEnabled ? 'enabled' : 'disabled'}");
+      if (event.mediaType == 'video') {
+        state = AsyncData(currentState.copyWith(
+          isRemoteVideoEnabled: event.isEnabled,
+          remoteVideoView: activeStrategy?.remoteVideoView,
+        ));
+      } else if (event.mediaType == 'audio') {
+        state = AsyncData(currentState.copyWith(
+          isRemoteAudioEnabled: event.isEnabled,
+        ));
+      }
+    } else if (event is SignalingConnectedEvent) {
+      GSLogger.info("MediaSessionNotifier: Signaling connected");
+      state = AsyncData(currentState.copyWith(
+        isSignalingConnected: true,
+      ));
+    } else if (event is ConnectionFailedEvent) {
+      GSLogger.error("MediaSessionNotifier: Connection failed - ${event.reason}");
+    } else if (event is LocalMediaUnavailableEvent) {
+      GSLogger.warning("MediaSessionNotifier: Local media unavailable - ${event.reason}");
+    }
   }
 
   /// Subscribes to the active strategy's data stream to handle incoming data.

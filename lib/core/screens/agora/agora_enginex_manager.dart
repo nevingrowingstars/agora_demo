@@ -61,9 +61,26 @@ class AgoraEngineXManager {
 
     GSLogger.info("AgoraEngineManager: Initializing engine...");
 
+    // Retry mechanism for web platform where Iris SDK may not be ready immediately
+    const maxRetries = 3;
+    const retryDelay = Duration(milliseconds: 500);
+    
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        _engine = createAgoraRtcEngine();
+        break; // Success, exit retry loop
+      } catch (e) {
+        if (attempt < maxRetries) {
+          GSLogger.warning("AgoraEngineManager: createAgoraRtcEngine attempt $attempt failed, retrying...");
+          await Future.delayed(retryDelay);
+        } else {
+          GSLogger.error("AgoraEngineManager: createAgoraRtcEngine failed after $maxRetries attempts: $e");
+          rethrow;
+        }
+      }
+    }
+
     try {
-      //_engine = createAgoraRtcEngineEx();
-      _engine = createAgoraRtcEngine();
 
       await _engine!.initialize(RtcEngineContext(
         appId: appId,

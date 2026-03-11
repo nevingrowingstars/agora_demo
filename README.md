@@ -19,15 +19,16 @@ Tools • Dart 3.6.1 • DevTools 2.40.2
 
 #### Building the App
 
-1)  Modify the agora_config.dart (lib/core/config) to modify the ApiId and token
-
+Modify the agora_config.dart (lib/core/config) to modify the ApiId and token
   
     flutter clean
 
     flutter pub get
    
     flutter build web
-  
+
+#### Run the App
+
     flutter run -d chrome
 
 

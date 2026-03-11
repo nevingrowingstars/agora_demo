@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:agora_demo/core/screens/classroom/audio_test_service_stub.dart';
+import 'package:agora_demo/core/screens/classroom/audio_test_service.dart';
 import 'package:agora_demo/core/state/device/device_selection_provider.dart';
 import 'package:agora_demo/core/util/app_logger_util.dart';
 import 'package:audioplayers/audioplayers.dart';

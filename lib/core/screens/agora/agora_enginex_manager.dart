@@ -171,7 +171,15 @@ class AgoraEngineXManager {
           "AgoraEngineXManager: Switching audio output to: $deviceId");
 
       final deviceManager = await _engine!.getAudioDeviceManager();
+
+
+      GSLogger.info(
+          "AgoraEngineXManager: setting followSystemPlaybackDevice false ");
+
       await deviceManager.followSystemPlaybackDevice(false);
+
+      GSLogger.info(
+          "AgoraEngineXManager: Going to get current Playback devices...");
 
       // Log current device before change
       try {

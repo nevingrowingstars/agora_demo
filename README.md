@@ -32,7 +32,7 @@ Modify the agora_config.dart (lib/core/config) to modify the ApiId and token
     flutter run -d chrome
 
 
-When the application is started, you will see an option to join classroom as Tutor or as a Student. Login as a Tutor from one machine and as Student from another machine. 
+Once the application is started, you will see an option to join classroom as Tutor or as a Student. Login as a Tutor from one machine and as Student from another machine. 
 
 Select the audio input, audio output and video device from the list. 
 

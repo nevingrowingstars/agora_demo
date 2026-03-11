@@ -32,11 +32,12 @@ Modify the agora_config.dart (lib/core/config) to modify the ApiId and token
     flutter run -d chrome
 
 
-Once the application is started, you will see an option to join classroom as Tutor or as a Student. Login as a Tutor from one machine and as Student from another machine. 
+Once the application starts, you will see an option to join the classroom either as a Tutor or as a Student. Log in as a Tutor on one machine and as a Student on another machine.
 
-Select the audio input, audio output and video device from the list. 
+Select the audio input, audio output, and video device from the available list.
 
-Grant the microphone and camera permission. If it still shows warning, click on “Retry Media Check” button to update. 
+Grant permission for the microphone and camera when prompted. If a warning message still appears, click the “Retry Media Check” button to refresh the device status.
 
-Once the user is joined as Tutor or as Student, you can use the Settings to change the device using the “Settings” button provided on the top,
+After joining the classroom as a Tutor or Student, you can change the selected devices using the “Settings” button located at the top of the screen.
+
 
